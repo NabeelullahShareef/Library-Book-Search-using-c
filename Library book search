@@ -1,0 +1,121 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Structure to hold book details
+typedef struct {
+    int id;
+    char title[100];
+    char author[100];
+} Book;
+
+// Structure for the Binary Search Tree Node
+typedef struct TreeNode {
+    Book data;
+    struct TreeNode *left;
+    struct TreeNode *right;
+} TreeNode;
+
+// Function to create a new tree node
+TreeNode* createNode(Book book) {
+    TreeNode* newNode = (TreeNode*)malloc(sizeof(TreeNode));
+    if (newNode == NULL) {
+        printf("Memory allocation failed!\n");
+        exit(1);
+    }
+    newNode->data = book;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+// Function to insert a book into the BST based on book ID
+TreeNode* insertBook(TreeNode* root, Book book) {
+    // If the tree is empty, return a new node
+    if (root == NULL) {
+        return createNode(book);
+    }
+
+    // Otherwise, recur down the tree
+    if (book.id < root->data.id) {
+        root->left = insertBook(root->left, book);
+    } else if (book.id > root->data.id) {
+        root->right = insertBook(root->right, book);
+    }
+
+    // Return the (unchanged) node pointer (if ID already exists)
+    return root;
+}
+
+// Function to search for a book by its ID
+TreeNode* searchBook(TreeNode* root, int bookId) {
+    // Base Cases: root is null or the book ID is present at the root
+    if (root == NULL || root->data.id == bookId) {
+        return root;
+    }
+
+    // Key is greater than root's key, so search in the right subtree
+    if (root->data.id < bookId) {
+        return searchBook(root->right, bookId);
+    }
+
+    // Key is smaller than root's key, so search in the left subtree
+    return searchBook(root->left, bookId);
+}
+
+// Function to display all books using in-order traversal (sorted by ID)
+void inOrderTraversal(TreeNode* root) {
+    if (root != NULL) {
+        inOrderTraversal(root->left);
+        printf("ID: %-5d | Title: %-30s | Author: %s\n", root->data.id, root->data.title, root->data.author);
+        inOrderTraversal(root->right);
+    }
+}
+
+// Main function to drive the program
+int main() {
+    TreeNode* libraryRoot = NULL;
+
+    // Insert books into the library
+    libraryRoot = insertBook(libraryRoot, (Book){101, "The C Programming Language", "Kernighan & Ritchie"});
+    libraryRoot = insertBook(libraryRoot, (Book){205, "Data Structures Using C", "Reema Thareja"});
+    libraryRoot = insertBook(libraryRoot, (Book){55, "Let Us C", "Yashavant Kanetkar"});
+    libraryRoot = insertBook(libraryRoot, (Book){310, "Introduction to Algorithms", "Cormen et al."});
+    libraryRoot = insertBook(libraryRoot, (Book){89, "Clean Code", "Robert C. Martin"});
+
+    printf("## All Books in the Library (Sorted by ID):\n");
+    printf("--------------------------------------------------------------------------\n");
+    inOrderTraversal(libraryRoot);
+    printf("--------------------------------------------------------------------------\n\n");
+
+    // --- Search for a book that exists ---
+    int searchId = 205;
+    printf("## Searching for book with ID: %d\n", searchId);
+
+    TreeNode* foundBookNode = searchBook(libraryRoot, searchId);
+
+    if (foundBookNode != NULL) {
+        printf("✅ Book Found!\n");
+        printf("   ID: %d\n", foundBookNode->data.id);
+        printf("   Title: %s\n", foundBookNode->data.title);
+        printf("   Author: %s\n", foundBookNode->data.author);
+    } else {
+        printf("❌ Book with ID %d not found in the library.\n", searchId);
+    }
+    
+    printf("\n--------------------------------------------------------------------------\n\n");
+    
+    // --- Search for a book that doesn't exist ---
+    int searchIdNotFound = 999;
+    printf("## Searching for book with ID: %d\n", searchIdNotFound);
+    
+    foundBookNode = searchBook(libraryRoot, searchIdNotFound);
+    
+    if (foundBookNode != NULL) {
+        printf("✅ Book Found!\n");
+    } else {
+        printf("❌ Book with ID %d not found in the library.\n", searchIdNotFound);
+    }
+
+    return 0;
+}
